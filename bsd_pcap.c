@@ -2,7 +2,7 @@
 
 
 void
-proc_packet(u_char *args, const struct pcap_pkthdr *pkt_header, const u_char pkt)
+proc_packet(u_char *args, const struct pcap_pkthdr *pkt_header, const u_char *pkt)
 {
 	struct ether_header *ether_h;
 	struct ip *ip_h;
@@ -11,7 +11,7 @@ proc_packet(u_char *args, const struct pcap_pkthdr *pkt_header, const u_char pkt
 	u_int ip_s;
 
 	//cast the packet into a series of headers that breaks it into chunks
-	ether_h = (struct  ether_header *) pkt;
+	ether_h = (struct ether_header *) pkt;
 
 	ip_h = (struct ip *) (pkt + ETHER_HDR_LEN);
 	ip_s = (ip_h->ip_hl) * 4;
@@ -40,13 +40,13 @@ main(int argc, char *argv[])
 	// This block attempts to grab the default network interface
 	if ((dev = pcap_lookupdev(errbuf)) == NULL)
 	{
-		fprintf(stderr, "Unable to locate the default device: %s\n", errbuff);
+		fprintf(stderr, "Unable to locate the default device: %s\n", errbuf);
 		return(1);
 	}
 	fprintf(stdout, "Using device: %s\n", dev);
 
 	//This block attempts to find the ip and netmask for the device
-	if (pcap_lookupdev(dev, &net &mask, errbuf) == -1)
+	if (pcap_lookupnet(dev, &net, &mask, errbuf) == -1)
 	{
 		fprintf(stderr, "Unable to locate the device netmask: %s\n", errbuf);
 		net = 0;
