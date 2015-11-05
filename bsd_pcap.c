@@ -1,5 +1,6 @@
 #include "bsd_pcap.h"
 
+
 void
 proc_packet(u_char *args, const struct pcap_pkthdr *pkt_header, const u_char pkt)
 {
@@ -23,11 +24,10 @@ proc_packet(u_char *args, const struct pcap_pkthdr *pkt_header, const u_char pkt
 	udp_h = (struct udphdr *) (pkt + ETHER_HDR_LEN + ip_s);
 
 	payload = (const u_char *) (pkt + ETHER_HDR_LEN + ip_s + sizeof(udp_h));
-	
+
 	return;
 }
 
-	
 int
 main(int argc, char *argv[])
 {
@@ -88,3 +88,4 @@ main(int argc, char *argv[])
 	}
 
 	return(0);
+}
