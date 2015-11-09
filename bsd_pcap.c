@@ -1,6 +1,87 @@
 #include "bsd_pcap.h"
 
 
+
+void
+print_hex_ascii_line(const u_char *payload, int len, int offset)
+{
+	int i;
+	int gap;
+	const u_char *ch;
+
+	ch = payload;
+	for (i = 0; i < len; i++)
+	{
+		printf("%02x ", *ch);
+		ch++;
+		if (i == 7)
+			printf(" ");
+	}
+	
+	if (len < 8)
+		printf(" ");
+
+	if (len < 16)
+	{
+		gap = 16 - len;
+		for (i = 0; i < gap; i++)
+		{
+			printf("   ");
+		}
+	}
+	printf("   ");
+	ch = payload;
+	for (i = 0; i < len; i++)
+	{
+		if (isprint(*ch))
+		{
+			printf("%c", *ch);
+		} else
+		{
+			printf(".");
+		}
+		ch++;
+	}
+	printf("\n");
+	return;
+}
+
+void
+print_payload(const u_char *payload, int len)
+{
+	int len_rem; 
+	int line_width = 16; 
+	int line_len;
+	int offset = 0;
+	const u_char *ch = payload;
+
+	if (len <= 0)
+	{
+		return;
+	}
+		
+	if (len <= line_width)
+	{
+		print_hex_ascii_line(ch, len, offset);
+		return;
+	}
+
+	for (;;)
+	{
+		line_len = line_width % len_rem;
+		print_hex_ascii_line(ch, line_len, offset);
+		len_rem = len_rem - line_len;
+		ch = ch + line_len;
+		offset = offset + line_width;
+		if (len_rem <= line_width)
+		{
+			print_hex_ascii_line(ch, len_rem, offset);
+			break;
+		}
+	}
+	return;
+}
+
 void
 proc_packet(u_char *args, const struct pcap_pkthdr *pkt_header, const u_char *pkt)
 {
@@ -22,8 +103,15 @@ proc_packet(u_char *args, const struct pcap_pkthdr *pkt_header, const u_char *pk
 	}
 
 	udp_h = (struct udphdr *) (pkt + ETHER_HDR_LEN + ip_s);
-
 	payload = (const u_char *) (pkt + ETHER_HDR_LEN + ip_s + sizeof(udp_h));
+
+	printf("Source IP: %s\n", inet_ntoa(ip_h->ip_src));
+	printf("Source Port: %s\n", ntohs(udp_h->uh_sport));
+	
+	printf("Destination IP: %s\n", inet_ntoa(ip_h->ip_dst));
+	printf("Destination Port: %s\n", ntohs(udp_h->uh_dport));
+
+	print_payload(payload, ntohs(udp_h->uh_ulen - sizeof(struct udphdr)));
 
 	return;
 }
